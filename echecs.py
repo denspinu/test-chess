@@ -73,14 +73,14 @@ class Plateau:
         x, y = coord
         return 0 <= x < 8 and 0 <= y < 8
 
-# Exemple d'utilisation
+# Exemple d'utilisation avec des saisies utilisateur
 plateau = Plateau()
 plateau.initialiser_plateau()
 plateau.afficher_plateau()
 
-# Déplacer un pion blanc
-plateau.deplacer_pion((1, 0), (2, 0))
-plateau.afficher_plateau()
+# Saisies utilisateur pour déplacer un pion blanc
+depart = tuple(map(int, input("Entrez les coordonnées de départ (ligne colonne) : ").split()))
+arrivee = tuple(map(int, input("Entrez les coordonnées d'arrivée (ligne colonne) : ").split()))
+plateau.deplacer_pion(depart, arrivee)
 
-# Déplacer un pion noir (mouvement invalide)
-plateau.deplacer_pion((6, 0), (4, 0))
+plateau.afficher_plateau()
