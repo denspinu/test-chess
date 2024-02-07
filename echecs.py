@@ -41,7 +41,7 @@ class Plateau:
 
     def afficher_plateau(self):
         for ligne in self.board:
-            print([type(piece).__name__[0] if piece else '.' for piece in ligne])
+            print(' '.join([type(piece).__name__[0].upper() if piece else '.' for piece in ligne]))
 
     def deplacer_pion(self, depart, arrivee):
         # Vérifier si les coordonnées de départ et d'arrivée sont valides
@@ -52,20 +52,23 @@ class Plateau:
         x_dep, y_dep = depart
         x_arr, y_arr = arrivee
 
-        piece = self.board[x_dep][y_dep]
+        piece_dep = self.board[x_dep][y_dep]
+        piece_arr = self.board[x_arr][y_arr]
 
         # Vérifier si la pièce dans la case de départ est un pion
-        if not isinstance(piece, Pion):
+        if not isinstance(piece_dep, Pion):
             print("La pièce dans la case de départ n'est pas un pion.")
             return
 
-        # Vérifier si le déplacement est valide pour un pion
-        if (piece.couleur == "blanc" and x_arr == x_dep - 1 and y_arr == y_dep) or \
-           (piece.couleur == "noir" and x_arr == x_dep + 1 and y_arr == y_dep):
-            # Effectuer le déplacement
-            self.board[x_arr][y_arr] = piece
+        # Vérifier si la case d'arrivée est vide ou contient une pièce ennemie
+        if piece_arr is None or (piece_arr.couleur != piece_dep.couleur and abs(x_arr - x_dep) == 1 and abs(y_arr - y_dep) == 1):
+            # Effectuer le déplacement et la prise de pièce si possible
+            self.board[x_arr][y_arr] = piece_dep
             self.board[x_dep][y_dep] = None
-            print(f"Pion déplacé de {depart} à {arrivee}.")
+            print(f"Pion {piece_dep.couleur} déplacé de {depart} à {arrivee}.")
+
+            if piece_arr:
+                print(f"Prise de pièce {piece_arr.couleur} à {arrivee}.")
         else:
             print("Déplacement invalide pour un pion.")
 
@@ -73,14 +76,17 @@ class Plateau:
         x, y = coord
         return 0 <= x < 8 and 0 <= y < 8
 
-# Exemple d'utilisation avec des saisies utilisateur
-plateau = Plateau()
-plateau.initialiser_plateau()
-plateau.afficher_plateau()
+# Condition pour la saisie utilisateur
+if __name__ == '__main__':
+    # Exemple d'utilisation avec des saisies utilisateur
+    plateau = Plateau()
+    plateau.initialiser_plateau()
+    plateau.afficher_plateau()
 
-# Saisies utilisateur pour déplacer un pion blanc
-depart = tuple(map(int, input("Entrez les coordonnées de départ (ligne colonne) : ").split()))
-arrivee = tuple(map(int, input("Entrez les coordonnées d'arrivée (ligne colonne) : ").split()))
-plateau.deplacer_pion(depart, arrivee)
+    while True:
+        # Saisies utilisateur pour déplacer un pion
+        depart = tuple(map(int, input("Entrez les coordonnées de départ (ligne colonne) : ").split()))
+        arrivee = tuple(map(int, input("Entrez les coordonnées d'arrivée (ligne colonne) : ").split()))
 
-plateau.afficher_plateau()
+        plateau.deplacer_pion(depart, arrivee)
+        plateau.afficher_plateau()
