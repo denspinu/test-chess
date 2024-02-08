@@ -20,8 +20,8 @@ class TestPlateau(unittest.TestCase):
                           ". . . . . . . .\n" \
                           ". . . . . . . .\n" \
                           ". . . . . . . .\n" \
-                          "P P P P P P P P\n" \
-                          "T C F D R F C T\n"
+                          "p p p p p p p p\n" \
+                          "t c f d r f c t\n"
 
         # Initialiser le plateau avant d'afficher
         self.plateau.initialiser_plateau()
@@ -41,7 +41,12 @@ class TestPlateau(unittest.TestCase):
             self.plateau.deplacer_pion((3, 0), (4, 0))
             self.plateau.deplacer_pion((4, 0), (5, 0))
             self.plateau.deplacer_pion((5, 0), (6, 1))
-            expected_output = "Prise de pièce noir à (6, 1).\n"            
+            expected_output = "Pion blanc déplacé de (1, 0) à (2, 0).\n"
+            expected_output += "Pion blanc déplacé de (2, 0) à (3, 0).\n"
+            expected_output += "Pion blanc déplacé de (3, 0) à (4, 0).\n"
+            expected_output += "Pion blanc déplacé de (4, 0) à (5, 0).\n"
+            expected_output += "Pion blanc déplacé de (5, 0) à (6, 1).\n"
+            expected_output += "Prise de pièce noir à (6, 1).\n"
             self.assertEqual(mock_stdout.getvalue(), expected_output)
 
     def test_deplacement_pion_valide(self):
@@ -69,10 +74,62 @@ class TestPlateau(unittest.TestCase):
             # Tentative de déplacement d'un pion vers la droite (ce qui est invalide)
             self.plateau = Plateau()
             self.plateau.initialiser_plateau()
-            self.plateau.deplacer_pion((1, 0), (3, 0))
+            self.plateau.deplacer_pion((1, 0), (2, 1))
             expected_output = "Déplacement invalide pour un pion.\n"
             self.assertEqual(mock_stdout.getvalue(), expected_output)
 
+    def test_chemin_indisponible_tour(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            # Tentative de déplacement d'une tour vers l'avant sachant qu'il y a un pion devant (ce qui est impossible)
+            self.plateau = Plateau()
+            self.plateau.initialiser_plateau()
+            self.plateau.deplacer_tour((0, 0), (4, 0))
+            expected_output = "Le chemin n'est pas libre pour la tour.\n"
+            self.assertEqual(mock_stdout.getvalue(), expected_output)
+
+    def test_deplacement_tour_horizontal_vertical(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.plateau = Plateau()
+            self.plateau.initialiser_plateau()
+            # Déplacer un pion blanc vers le bas et ouvrir le chemin pour la tour
+            self.plateau.deplacer_pion((1, 0), (3, 0))
+            self.plateau.deplacer_tour((0, 0), (2, 0))
+            self.plateau.deplacer_tour((2, 0), (2, 7))
+            expected_output = "Pion blanc déplacé de (1, 0) à (3, 0).\n"
+            expected_output += "Tour blanc déplacée de (0, 0) à (2, 0).\n"
+            expected_output += "Tour blanc déplacée de (2, 0) à (2, 7).\n"
+            self.assertEqual(mock_stdout.getvalue(), expected_output)
+
+    def test_deplacement_invalide_tour(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.plateau = Plateau()
+            self.plateau.initialiser_plateau()
+            # Déplacer un pion blanc vers le bas et ouvrir le chemin pour la tour afin d'effectuer un déplacement non autorisé 
+            self.plateau.deplacer_pion((1, 0), (3, 0))
+            self.plateau.deplacer_tour((0, 0), (2, 0))
+            self.plateau.deplacer_tour((2, 0), (3, 1))
+            expected_output = "Pion blanc déplacé de (1, 0) à (3, 0).\n"
+            expected_output += "Tour blanc déplacée de (0, 0) à (2, 0).\n"
+            expected_output += "Déplacement invalide pour une tour.\n"
+            self.assertEqual(mock_stdout.getvalue(), expected_output)
+
+    def test_deplacement_invalide_cavalier(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.plateau = Plateau()
+            self.plateau.initialiser_plateau()
+            # Déplacer un cavalier dans une position invalide 
+            self.plateau.deplacer_cavalier((0, 1), (2, 1))
+            expected_output = "Déplacement invalide pour un cavalier.\n"
+            self.assertEqual(mock_stdout.getvalue(), expected_output)
+
+    def test_deplacement_valide_cavalier(self):
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            self.plateau = Plateau()
+            self.plateau.initialiser_plateau()
+            # Déplacer un cavalier dans une position invalide 
+            self.plateau.deplacer_cavalier((0, 1), (2, 2))
+            expected_output = "Cavalier blanc déplacé de (0, 1) à (2, 2).\n"
+            self.assertEqual(mock_stdout.getvalue(), expected_output)
 
 if __name__ == '__main__':
     unittest.main()
